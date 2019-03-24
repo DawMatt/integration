@@ -1,0 +1,660 @@
+openapi: 3.0.2
+info:
+  title: ss Domain API
+  description: >-
+    Accesses and writes s-specific domain information and functionality. This includes both s details and the Logistics aspects of the os (s or t) and iy related to the s.
+    The domain also supports data change event notification.
+  contact:
+    name: To Be Determined
+    url: 'http://b.integrationsupport.url'
+    email: tbd@b.integration.com
+  version: 0.1.1
+servers:
+- url: https://{apiApp}-bau-dev-aes.integdaes.au.b.com:{port}/{basePath}
+  description: The development API server
+  variables:
+    apiApp:
+      # name of the API application being exposed
+      default: tbdapiapp
+    port:
+      enum:
+        - '8443'
+        - '443'
+      default: '443'
+    basePath:
+      # open meaning there is the opportunity to use special base paths as assigned by the provider, default is `api/process`
+      default: api/process
+security:
+  - apiKeyHeader: []
+    OAuth2ClientCredentialAuth: []
+  - apiKeyQuery: []
+    OAuth2ClientCredentialAuth: []
+paths:
+  /isAlive:
+    get:
+      tags: [Health Check]
+      operationId: isAlive
+      summary: Check responsive
+      description: Indicates if application is running and responsive. Responds with HTTP 200 if request is successfully routed to application.
+      responses:
+        "200":
+          $ref: "#/components/responses/200Ok"
+  /isAliveAndWell:
+    get:
+      tags: [Health Check]
+      operationId: isAliveAndWell
+      summary: Check responsive including dependencies
+      description: Indicates if application and it's immediate dependencies are running and responsive. Responds with HTTP 200 if request was successfully routed to application 
+      responses:
+        "200":
+          $ref: "#/components/responses/200Ok"
+  /ss:
+    get:
+      tags: [ss]
+      operationId: ssByQuery
+      summary: Retrieve a list of ss by query
+      description: >-
+        Retrieve a list of ss matching the query parameters
+      security:
+        - OAuth2ClientCredentialAuth:
+            - b:canonical:s:get
+      parameters:
+        - $ref: "#/components/parameters/correlationId"
+        - $ref: "#/components/parameters/x-mock-response"
+        - $ref: '#/components/parameters/changeDateTimeStart'
+        - $ref: '#/components/parameters/changeDateTimeEnd'
+        - $ref: '#/components/parameters/legalEntityID'
+        - $ref: '#/components/parameters/legacydDocument'
+        - $ref: '#/components/parameters/legacydDocumentLine'
+        - $ref: '#/components/parameters/sLocationFrom'
+        - $ref: '#/components/parameters/sLocationTo'
+        - $ref: '#/components/parameters/sStatus'
+        - $ref: '#/components/parameters/tationMode'
+      responses:
+        "200":
+          $ref: "#/components/responses/200Ok-s"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "429":
+          $ref: "#/components/responses/429TooManyRequests"
+        "500":
+          $ref: "#/components/responses/500InternalServerError"
+        "503":
+          $ref: "#/components/responses/503ServiceUnavailable"
+    post:
+      tags: [ss]
+      operationId: sPost
+      summary: Creates new ss
+      description: >-
+        Adds new ss to the domain.
+        As a temporary measure Project a will allow automatic creation of "stubs" representing prerequisite data for a s.
+        The following "stubs" will be supported - iies, t os, s os and Loads to be created at the time of this operation.
+      security:
+        - OAuth2ClientCredentialAuth:
+            - b:canonical:s:postputdelete
+      parameters:
+        - $ref: "#/components/parameters/correlationId"
+        - $ref: "#/components/parameters/x-mock-response"
+      requestBody:
+        $ref: "#/components/requestBodies/sMessage"
+      responses:
+        "201":
+          $ref: "#/components/responses/201Created-s"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "429":
+          $ref: "#/components/responses/429TooManyRequests"
+        "500":
+          $ref: "#/components/responses/500InternalServerError"
+        "503":
+          $ref: "#/components/responses/503ServiceUnavailable"
+  /ss/{id}:
+    get:
+      tags: [ss]
+      summary: Retrieve a s by ID
+      description: >-
+        Retrieve information about an individual s
+      operationId: sByID
+      security:
+        - OAuth2ClientCredentialAuth:
+            - b:canonical:s:get
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/correlationId"
+        - $ref: "#/components/parameters/x-mock-response"
+      responses:
+        "200":
+          # Note: Consider using 200Ok-Singles response instead, to avoid returning an array with a single entry 
+          # Also would lead to cleaner semantics for all .../{id} paths if all accepted non-array requests and generated non-array responses.
+          $ref: "#/components/responses/200Ok-s"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "429":
+          $ref: "#/components/responses/429TooManyRequests"
+        "500":
+          $ref: "#/components/responses/500InternalServerError"
+        "503":
+          $ref: "#/components/responses/503ServiceUnavailable"
+    delete:
+      tags: [ss]
+      summary: Delete a s
+      description: >-
+        Deletes an individual s
+      operationId: sDelete
+      security:
+        - OAuth2ClientCredentialAuth:
+            - b:canonical:s:postputdelete
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/correlationId"
+        - $ref: "#/components/parameters/x-mock-response"
+      responses:
+        "204":
+          $ref: "#/components/responses/204Ok-NoResponseBody"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "429":
+          $ref: "#/components/responses/429TooManyRequests"
+        "500":
+          $ref: "#/components/responses/500InternalServerError"
+        "503":
+          $ref: "#/components/responses/503ServiceUnavailable"
+    put:
+      tags: [ss]
+      summary: Replace a s
+      description: >-
+        Replace the existing details for an individual s.
+        As a temporary measure Project a will allow automatic creation of "stubs" representing prerequisite data for a s.
+        The following "stubs" will be supported - iies, t os, s os and Loads to be created at the time of this operation.
+      operationId: sOverwrite
+      security:
+        - OAuth2ClientCredentialAuth:
+            - b:canonical:s:postputdelete
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - $ref: "#/components/parameters/correlationId"
+        - $ref: "#/components/parameters/x-mock-response"
+      requestBody:
+        $ref: "#/components/requestBodies/sMessage"
+        # Note: Consider using "#/components/requestBodies/s" instead for PUT. 
+      responses:
+        "204":
+          $ref: "#/components/responses/204Ok-NoResponseBody"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "429":
+          $ref: "#/components/responses/429TooManyRequests"
+        "500":
+          $ref: "#/components/responses/500InternalServerError"
+        "503":
+          $ref: "#/components/responses/503ServiceUnavailable"
+    patch:
+      tags: [ss]
+      summary: Update a s
+      description: >-
+        Update s tation planning details for an individual s
+      operationId: sUpdate
+      security:
+        - OAuth2ClientCredentialAuth:
+            - b:canonical:s:patch
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - $ref: "#/components/parameters/correlationId"
+        - $ref: "#/components/parameters/x-mock-response"
+      requestBody:
+        $ref: "#/components/requestBodies/sPatch"
+      responses:
+        "204":
+          $ref: "#/components/responses/204Ok-NoResponseBody"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "403":
+          $ref: "#/components/responses/403Forbidden"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "429":
+          $ref: "#/components/responses/429TooManyRequests"
+        "500":
+          $ref: "#/components/responses/500InternalServerError"
+        "503":
+          $ref: "#/components/responses/503ServiceUnavailable"
+components:
+  schemas:
+  # API Common Schemas
+    messageSchema:
+      type: object
+      properties:
+        message:
+          type: string
+    errorSchema:
+      type: object
+      properties:
+        code:
+          type: string        
+        target:
+          type: string
+        message:
+          type: string
+        stackTrace:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        details:
+          $ref: '#/components/schemas/errorDetailsArraySchema'
+    errorDetailSchema:
+      type: object
+      properties:
+        code:
+          type: string        
+        target:
+          type: string
+        message:
+          type: string
+    errorDetailsArraySchema:
+      type: array
+      items:
+        $ref: '#/components/schemas/errorDetailSchema'
+    errorResponseSchema:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/errorSchema'
+    dateTimeSchema:
+      description: >-
+        Full date/time specified in RFC3339 format. This will be interpreted by the server as local time if timezone offset not specified.
+        e.g. YYYY-MM-DDThh:mm:ssZ or YYYY-MM-DDThh:mm:ss+11:00
+      type: string
+      format: date-time
+      example: 
+        - "2019-02-21T13:45:00+11:00"
+        - "2019-02-21T13:45:00Z"
+
+  # API Specific Schemas
+    sSchema:
+      type: object
+      description: >-
+        To Be Defined in Detailed Design. 
+        Current draft includes the parameters used by the operations.
+        Additionally will include the Logistics aspects of the os (s or t) and iy related to the s.
+      properties:
+        legalEntityID:
+          "$ref": "#/components/schemas/legalEntityIDSchema"
+        sStatus:
+          "$ref": "#/components/schemas/sStatusSchema"
+        sID:
+          "$ref": "#/components/schemas/sIDSchema"
+        legacydDocument:
+          "$ref": "#/components/schemas/legacydDocumentSchema"
+        legacydDocumentLine:
+          "$ref": "#/components/schemas/legacydDocumentLineSchema"
+        sLocationFrom:
+          "$ref": "#/components/schemas/sLocationFromSchema"
+        sLocationTo:
+          "$ref": "#/components/schemas/sLocationToSchema"
+        tsID:
+          "$ref": "#/components/schemas/tsIDSchema"
+        tationMode:
+          "$ref": "#/components/schemas/tationModeSchema"
+    sMessageSchema:
+      type: object
+      properties:
+        standardBusinessDocumentHeader:
+          type: object
+          properties:
+            DocumentIdentification:
+              type: object
+              properties:
+                InstanceIdentifier:
+                  type: string
+                CreationDateAndTime:
+                  type: string
+                  format: date-time
+                Type:
+                  type: string
+        s:
+          uniqueItems: false
+          type: array
+          items:
+            "$ref": "#/components/schemas/sSchema"
+    sPatchSchema:
+      type: object
+      description: >-
+        s schema elements that are able to be updated at the element level.
+      properties:
+        tsID:
+          "$ref": "#/components/schemas/tsIDSchema"
+    legalEntityIDSchema:
+      description: >-
+        Identifies the b legal entity that owns this document. 
+      type: string
+      enum: 
+        - "1010"
+        - "1310"
+    sStatusSchema:
+      description: >-
+        Indicates the status of s.
+      type: string
+      enum: 
+        - "Planned"
+        - "Actual"
+    sIDSchema: 
+      description: >-
+        Unique identifier for an individual s.
+      type: string
+    legacydDocumentSchema: 
+      description: >-
+        Unique legacy system d Document identifier for an individual s.
+      type: string
+    legacydDocumentLineSchema: 
+      description: >-
+        Unique legacy system d Document line identifier for an individual s.
+      type: string
+    sLocationFromSchema: 
+      description: >-
+        Code representing the location an individual s originated from. For multi-leg t this represents the origination point for the current leg.
+      type: string        
+    sLocationToSchema: 
+      description: >-
+        Code representing the location an individual s is destined for. For multi-leg t this represents the destination for the current leg.
+      type: string        
+    tsIDSchema: 
+      description: >-
+        Unique identifier the t Management System uses for the tation associated with a s.
+      type: string
+    tationModeSchema:
+      description: >-
+        The tation mode used by the s. Modes are specified using a subset GS1's tModeCode code list ( urn:gs1:gdd:cl:tModeCode ). Supports Maritime (10), Rail (20), Road (30) and Air (40) t modes.
+      type: string
+      enum:
+        - 10
+        - 20
+        - 30
+        - 40
+
+  responses: 
+    200Ok:
+      description: Request has succeeded
+    200Ok-s:
+      description: Request has succeeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/sMessageSchema'
+    # Note: 200Ok-Singles not currently in use. Relevant if we swap all .../{id} path operations to use non-array response bodies
+    200Ok-Singles:
+      description: Request has succeeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/sSchema'
+    201Created-s:
+      description: Resource created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/sMessageSchema'
+    202AcceptedMessage:
+      description: Successfully accepted for further processing
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/messageSchema'
+    204Ok-NoResponseBody:
+      description: Request has succeeded
+    400BadRequest:
+      description: The request was invalid or cannot be otherwise served.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponseSchema'
+    401Unauthorized:
+      description: Authentication credentials were missing or incorrect.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponseSchema'
+    403Forbidden:
+      description: The request is understood, but it has been refused or access is not allowed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponseSchema'
+    404NotFound:
+      description: The URI requested is invalid or the resource requested does not exists. 
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponseSchema'
+    409Conflict:
+      description: Any message which should help the user to resolve the conflict. 
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponseSchema'
+    429TooManyRequests:
+      description: The request cannot be served due to the application’s rate limit having been exhausted for the resource. 
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponseSchema'
+    500InternalServerError:
+      description: Something is broken.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponseSchema'
+    503ServiceUnavailable:
+      description: The server is up, but overloaded with requests. Try again later. 
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponseSchema'
+
+
+  parameters:
+  # API Common Parameters
+    # this id is used to flow a client-generated guid through the processing layers
+    # it aids in tracking, monitoring and error investigation
+    correlationId:
+      name: correlationId
+      in: header
+      description: Client-generated GUID with no decoration such as curly braces (eg.
+        "9C4D50EE-2D56-4CD3-8152-34347DC9F2B0").
+      required: false
+      schema:
+        type: string
+        format: uuid
+    x-mock-response:
+      name: x-mock-response
+      in: header
+      description: When set to "true" the API will return a mocked response.
+      required: false
+      schema:
+        type: boolean
+    id:
+      name: id
+      in: path
+      required: true
+      description: Document identifier
+      schema:
+        type: string
+    changeDateTimeStart:
+      name: changeDateTimeStart
+      in: query
+      description: >-
+        If we're interested only in results that have changed within a period of time, this specifies the start of the interval. 
+        ie, show me all records changed since this timestamp.
+        Full date/time specified in RFC3339 format. This will be interpreted by the server as local time if timezone offset not specified.
+      required: false
+      allowEmptyValue: false
+      schema:
+        "$ref": "#/components/schemas/dateTimeSchema"
+    changeDateTimeEnd:
+      name: changeDateTimeEnd
+      in: query
+      description: >-
+        If we're interested only in results that have changed within a period of time, this specifies the end of the interval. 
+        If it is not supplied, it will use the current date time.
+        ie, show me all records changed up till this timestamp.
+        Full date/time specified in RFC3339 format. This will be interpreted by the server as local time if timezone offset not specified.
+      required: false
+      allowEmptyValue: false
+      schema:
+        "$ref": "#/components/schemas/dateTimeSchema"
+
+  # API Specific Parameters 
+    legalEntityID:
+      name: legalEntityID
+      in: query
+      description: >-
+        Identifies the b legal entity that owns this s. 
+        If it is not supplied, it will get ss for all legal entities.
+        ie, show me all records related to the specified legal entity.
+      required: false
+      allowEmptyValue: false
+      schema:
+        "$ref": "#/components/schemas/legalEntityIDSchema"
+    sStatus:
+      name: sStatus
+      in: query
+      required: false
+      allowEmptyValue: false
+      schema:
+        "$ref": "#/components/schemas/sStatusSchema"
+    sID: 
+      name: sID
+      in: query
+      required: true
+      allowEmptyValue: false
+      schema:
+        "$ref": "#/components/schemas/sIDSchema"
+    legacydDocument: 
+      name: legacydDocument
+      in: query
+      required: false
+      allowEmptyValue: false
+      schema:
+        "$ref": "#/components/schemas/legacydDocumentSchema"
+    legacydDocumentLine: 
+      name: legacydDocumentLine
+      in: query
+      required: false
+      allowEmptyValue: false
+      schema:
+        "$ref": "#/components/schemas/legacydDocumentLineSchema"
+    sLocationFrom: 
+      name: sLocationFrom
+      in: query
+      required: false
+      allowEmptyValue: false
+      schema:
+        "$ref": "#/components/schemas/sLocationFromSchema"
+    sLocationTo: 
+      name: sLocationTo
+      in: query
+      required: false
+      allowEmptyValue: false
+      schema:
+        "$ref": "#/components/schemas/sLocationToSchema"
+    tsID: 
+      name: tsID
+      in: query
+      required: true
+      allowEmptyValue: false
+      schema:
+        "$ref": "#/components/schemas/tsIDSchema"
+    tationMode:
+      name: tationMode
+      in: query
+      required: false
+      allowEmptyValue: false
+      schema:
+        "$ref": "#/components/schemas/tationModeSchema"
+  examples: {}
+  requestBodies:
+    sMessage:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/sMessageSchema"
+      description: s document message
+      required: true
+    s:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/sSchema"
+      description: s document
+      required: true
+    sPatch:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/sPatchSchema"
+      description: s patch document
+      required: true
+  headers: {}
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
+    apiKeyQuery:
+      type: apiKey
+      name: subscription-key
+      in: query
+    OAuth2ClientCredentialAuth:
+      type: oauth2
+      description: OAuth 2.0 Client Credential flow based authorization for standalone
+        application (no users interacting with client app) to API access.
+      x-data-auth-type:
+        description: Custom claim in access token. Claim value is used by API to make resource level authorization decisions. e.g. which data silo can caller (app or user) access.
+        All: Grants access to operate on any resource via API operation. e.g. Admin
+          users or apps should be able to work with any policies
+        Org: Grants access to operate on resources owned by caller''s organisation.
+          e.g. trading partners can only access data for their own organisation
+        Own: Grants access to operate only on caller''s own resources. e.g.
+          customer should be able to operate only on their own policy via an API
+      flows:
+        clientCredentials:
+          # tokenUrl to be confirmed during detailed design, once uploaded to APIM. Example:
+          tokenUrl: 'https://login.microsoftonline.com/78872ca8-56cd-44d6-af6f-4b6263a8cf3c/oauth2/token'
+          scopes:
+            'b:canonical:s:postputdelete' : Grants upsert and delete access for s
+            'b:canonical:s:patch' : Grants selective update access for s
+            'b:canonical:s:get' : Grants read access for s
+  links: {}
+  callbacks: {}
